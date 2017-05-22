@@ -8,15 +8,11 @@
 #
 
 library(shiny)
+library(plotly)
 library(shinydashboard)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-  
-  # Application title
-
-  
-  # Application Back drop
   
   dashboardPage(
     
@@ -61,19 +57,20 @@ shinyUI(fluidPage(
     ),
    
     dashboardBody(
-      renderInfoBox({
+      fluidRow(
+      valueBox(1.3, "Average Years Saved!", icon = icon("plus-square")),
         infoBox(
-          "Accept Offer", "Years?", icon = icon("thumbs-up", lib = "glyphicon"),
+          "Accept Offer", "12% Chance of Failure", icon = icon("thumbs-up", lib = "glyphicon"),
           color = "green", fill = TRUE
+        )),
+      fluidRow(
+        #infoBox(
+         # "Reject Offer", "Years?", icon = icon("thumbs-down", lib = "glyphicon"),
+         # color = "red", fill = TRUE
+      #  )
+        plotlyOutput("FirstPlotly")
         )
-      }),
-      renderInfoBox({
-        infoBox(
-          "Reject Offer", "Years?", icon = icon("thumbs-down", lib = "glyphicon"),
-          color = "red", fill = TRUE
-        )
-      })
     )
-  )
+    )
 
 ))
