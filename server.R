@@ -9,6 +9,7 @@
 
 library(shiny)
 library(ggplot2)
+library(plotly)
 
 
 # Define server logic required to draw a histogram
@@ -25,9 +26,14 @@ D<-reactive({ temp_<-temp_sub[temp_sub$ABO=='O',]
   temp_<-temp_[temp_$DAYS_ON_DIAL>(2*365)&!is.na(temp_$DAYS_ON_DIAL),]
   return(temp_)
 })
-  
+
+
 output$FirstPlot<-renderPlot({
+  if (input$calculate == 0)
+    return()
+  
   MyData<-D()
+  
   print(
         ggplot(MyData,aes(x=DAYS_ON_DIAL))+
             geom_density(fill='blue',colour=NA,alpha=.2)+
@@ -38,7 +44,27 @@ output$FirstPlot<-renderPlot({
             ylab('')+
             theme_minimal()
         )
+  
 })  
+
+output$vbox <- renderValueBox({
+  if (input$calculate == 0)
+    return(valueBox(value='',subtitle = ''))
+  
+  valueBox(1.3, "Average Years Saved!", icon = icon("plus-square"))
+})
+
+output$ibox <- renderInfoBox({
+  if (input$calculate == 0)
+    return(infoBox(title=''))
+  
+  infoBox(
+    "Accept Offer", "12% Chance of Failure", icon = icon("thumbs-up", lib = "glyphicon"),
+    color = "green", fill = TRUE
+  )
+  
+})
+
 
 output$FirstPlotly<-renderPlotly({
   MyData<-D()
