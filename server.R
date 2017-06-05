@@ -19,85 +19,81 @@ shinyServer(function(input, output) {
 load('kidData.RData')
   
 D<-reactive({ 
-  temp_<-temp_sub[temp_sub$ABO=='O',]
-  temp_<-temp_[temp_$OPO_CTR_CODE=='08866',]
-  temp_<-temp_[temp_$REGION==5,]
-  temp_<-temp_[temp_$CDC_RISK_HIV_DON!="Y",]
-  temp_<-temp_[temp_$KDPI<70,]
-  temp_<-temp_[temp_$AGE>50,]
-  temp_<-temp_[temp_$DAYS_ON_DIAL>(2*365)&!is.na(temp_$DAYS_ON_DIAL),]
+  temp_<-temp_sub[temp_sub$ABO==input$pat_blood,]
+  #temp_<-temp_[temp_$OPO_CTR_CODE=='08866',]
+  temp_<-temp_[temp_$REGION==input$region,]
+  x<-input$pat_risk
+  if(x==FALSE){y<-"N"}
+  if(x==TRUE){y<-"Y"}
+  temp_<-temp_[temp_$CDC_RISK_HIV_DON!=y,]
+  temp_<-temp_[temp_$KDPI<input$kdpi,]
+  temp_<-temp_[temp_$AGE>input$age,]
+  z<-(input$time_d)*365
+  temp_<-temp_[temp_$DAYS_ON_DIAL>z&!is.na(temp_$DAYS_ON_DIAL),]
   return(temp_)
 })
 
+z<-reactive({
+  k_len<-18.005*input$kdpi^(-0.218)
+  nk_len<-18.005*(mean(D()$KDPI))^(-0.218)
+  #extra years of kidney by waiting
+  x<-nk_len-k_len
+  #time on dialysis if wait
+  y<-(mean(D()$DAYS_ON_DIAL)/365)-input$time_d
+  z<-y-x
+  
+  return(z)
+})
 
 output$FirstPlot<-renderPlot({
   if (input$calculate == 0)
     return()
   
   print(
-        ggplot(MyData,aes(x=DAYS_ON_DIAL))+
+        ggplot(D(),aes(x=DAYS_ON_DIAL))+
             geom_density(fill='blue',colour=NA,alpha=.2)+
             #gemo_line(stat="density")+
             #facet_grid(CTR_CODE~.)+
-            xlab('Time on Dialysis')+
+            xlab('Expected Time on Dialysis (Days)')+
             xlim(500,6000)+
-            ylab('')+
+            ylab('Density')+
+            ggtitle('Distribution of Time on Dialysis if Reject')+
             theme_minimal()
         )
   
 })  
 
 output$vbox <- renderValueBox({
+
   if (input$calculate == 0)
-    return(valueBox(value='',subtitle = ''))
+    return(valueBox(value='0',subtitle = 'Average Years Saved',color = "green"))
   
-  valueBox(1.3, "Average Years Saved!", icon = icon("plus-square")) #color = "purple"
+  valueBox(round(z(),1), "Average Years Saved!", icon = icon("plus-square")) #color = "purple"
 })
 
 # Info box to display depending on offer
-x = 32  # x is variable for chance of success, >50 is success and <50 is reject, change with if statment
+x = 51 # x is variable for chance of success, >50 is success and <50 is reject, change with if statment
 
-if (x > 50) {
-  output$ibox_accept <- renderInfoBox({
+output$ibox_rec <- renderInfoBox({
     if (input$calculate == 0) 
-      return(infoBox(title=''))
-    
-    infoBox(
-      "Accept Offer", paste0(x, "%"), "Chance of Success", icon = icon("thumbs-up", lib = "glyphicon"),
-      color = "green", fill = TRUE, width = 90
-    )
-    
-  })
-} else {
-  output$ibox_reject <- renderInfoBox({
-    if (input$calculate == 0) 
-      return(infoBox(title=''))
-    
-    infoBox(
-      "Reject Offer", paste0(x, "%"), "Chance of Success", icon = icon("thumbs-down", lib = "glyphicon"),
-      color = "red", fill = TRUE, width = 90
-    )
+      return(infoBox(title='Enter Info on Left Menu!', color = "green"))
+    if(z()>0){
+      return(infoBox(
+      "Accept Offer", icon = icon("thumbs-up", lib = "glyphicon"),color = "green", fill = TRUE, width = 90)
+      )
+    }
+    if(z()<=0){
+      return(
+        infoBox(
+          "Reject Offer", icon = icon("thumbs-down", lib = "glyphicon"),
+          color = "red", fill = TRUE, width = 90)
+      )
+    }
     
   })
 
-}
 
-output$FirstPlotly<-renderPlotly({
-  MyData<-D()
-  
-  p<-ggplot(MyData,aes(x=DAYS_ON_DIAL))+
-      geom_density(fill='blue',colour=NA,alpha=.2)+
-      #gemo_line(stat="density")+
-      #facet_grid(CTR_CODE~.)+
-      xlab('Time on Dialysis')+
-      xlim(500,6000)+
-      ylab('')+
-      theme_minimal()
-  
-  return(ggplotly(p))
-  
-  
-})  
+
 
 
 
