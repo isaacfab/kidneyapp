@@ -14,7 +14,7 @@ library(shinydashboard)
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
   
-  dashboardPage(
+    dashboardPage(skin = "blue",
     
     header = dashboardHeader(title = "Kidney Action"), #titleWidth = 250),
     
@@ -56,16 +56,16 @@ shinyUI(fluidPage(
         
     ),
    
-    dashboardBody(
+    dashboardBody(tags$head(tags$style(HTML('.info-box {min-height: 100px;} .info-box-icon {height: 100px; line-height: 100px;} .info-box-content {padding-top: 16px; padding-bottom: 0px;}'))),
+                  tags$head(tags$style(HTML('.small-box {height: 100px;} .small-box-content {padding-top: 16px; padding-bottom: 0px;}'))),
       fluidRow(
-        valueBoxOutput('vbox'),
-        infoBoxOutput('ibox')
+        
+        valueBoxOutput('vbox'), tags$style("#vbox {width:250px;}"),
+        infoBoxOutput('ibox_accept'), tags$style("#ibox {width:250px;}"),
+        infoBoxOutput('ibox_reject'), tags$style("#ibox {width:250px;}")
         ),
       fluidRow(
-        #infoBox(
-         # "Reject Offer", "Years?", icon = icon("thumbs-down", lib = "glyphicon"),
-         # color = "red", fill = TRUE
-      #  )
+       
         plotOutput("FirstPlot")
         )
     )

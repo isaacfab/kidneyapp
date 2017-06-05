@@ -12,6 +12,7 @@ library(ggplot2)
 library(plotly)
 
 
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
@@ -50,20 +51,36 @@ output$vbox <- renderValueBox({
   if (input$calculate == 0)
     return(valueBox(value='',subtitle = ''))
   
-  valueBox(1.3, "Average Years Saved!", icon = icon("plus-square"))
+  valueBox(1.3, "Average Years Saved!", icon = icon("plus-square")) #color = "purple"
 })
 
-output$ibox <- renderInfoBox({
-  if (input$calculate == 0)
-    return(infoBox(title=''))
-  
-  infoBox(
-    "Accept Offer", "12% Chance of Failure", icon = icon("thumbs-up", lib = "glyphicon"),
-    color = "green", fill = TRUE
-  )
-  
-})
+# Info box to display depending on offer
+x = 32  # x is variable for chance of success, >50 is success and <50 is reject, change with if statment
 
+if (x > 50) {
+  output$ibox_accept <- renderInfoBox({
+    if (input$calculate == 0) 
+      return(infoBox(title=''))
+    
+    infoBox(
+      "Accept Offer", paste0(x, "%"), "Chance of Success", icon = icon("thumbs-up", lib = "glyphicon"),
+      color = "green", fill = TRUE, width = 90
+    )
+    
+  })
+} else {
+  output$ibox_reject <- renderInfoBox({
+    if (input$calculate == 0) 
+      return(infoBox(title=''))
+    
+    infoBox(
+      "Reject Offer", paste0(x, "%"), "Chance of Success", icon = icon("thumbs-down", lib = "glyphicon"),
+      color = "red", fill = TRUE, width = 90
+    )
+    
+  })
+
+}
 
 output$FirstPlotly<-renderPlotly({
   MyData<-D()
