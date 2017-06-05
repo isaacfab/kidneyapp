@@ -17,7 +17,8 @@ shinyServer(function(input, output) {
 
 load('kidData.RData')
   
-D<-reactive({ temp_<-temp_sub[temp_sub$ABO=='O',]
+D<-reactive({ 
+  temp_<-temp_sub[temp_sub$ABO=='O',]
   temp_<-temp_[temp_$OPO_CTR_CODE=='08866',]
   temp_<-temp_[temp_$REGION==5,]
   temp_<-temp_[temp_$CDC_RISK_HIV_DON!="Y",]
@@ -31,8 +32,6 @@ D<-reactive({ temp_<-temp_sub[temp_sub$ABO=='O',]
 output$FirstPlot<-renderPlot({
   if (input$calculate == 0)
     return()
-  
-  MyData<-D()
   
   print(
         ggplot(MyData,aes(x=DAYS_ON_DIAL))+
